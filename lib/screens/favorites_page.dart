@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/states/my_app_global_state.dart';
+import 'package:myapp/states/generated_words_state.dart';
 import 'package:provider/provider.dart';
 
-final class FavoritesPage extends StatelessWidget {
+final class FavoritesPage extends StatefulWidget {
   const FavoritesPage({super.key});
 
   @override
+  State<FavoritesPage> createState() => _FavoritesPageState();
+}
+
+class _FavoritesPageState extends State<FavoritesPage> {
+  @override
   Widget build(BuildContext context) {
-    final appState = context.watch<MyAppGlobalState>();
+    final appState = context.watch<GeneratedWords>();
 
     if (appState.favorites.isEmpty) {
       return const Center(
@@ -21,39 +26,48 @@ final class FavoritesPage extends StatelessWidget {
       );
     }
 
-    final colorScheme = Theme.of(context).colorScheme;
-    final favorites = appState.favorites.toList();
-    return ListView(
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Center(
-            child: Text(
-              "You have ${favorites.length} favorites:",
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
+    final favorites = appState.favorites;
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Center(
+        child: Column(
+          children: <Widget>[
+            Text(
+              'You have ${favorites.length} favorites:',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Flexible(
+              fit: FlexFit.tight,
+              child: GridView.count(
+                crossAxisCount: 2,
+                mainAxisSpacing: 1,
+                crossAxisSpacing: 1,
+                children: favorites
+                    .map(
+                      (e) => Row(
+                        children: [
+                          IconButton(
+                            onPressed: () => setState(() {
+                              appState.deleteFavorite(e);
+                            }),
+                            icon: const Icon(Icons.delete_forever),
+                          ),
+                          Text(
+                            e.asLowerCase,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                    .toList(),
               ),
             ),
-          ),
+          ],
         ),
-        for (final favorite in favorites)
-          Card(
-            color: colorScheme.primary,
-            child: ListTile(
-              leading: Icon(
-                Icons.favorite,
-                color: colorScheme.onPrimary,
-              ),
-              title: Text(
-                favorite.asCamelCase,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-      ],
+      ),
     );
   }
 }

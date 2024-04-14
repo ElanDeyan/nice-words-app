@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/screens/home_page.dart';
-import 'package:myapp/states/my_app_global_state.dart';
+import 'package:myapp/states/generated_words_state.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -13,12 +13,18 @@ final class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => MyAppGlobalState(),
+      create: (context) => GeneratedWords(),
       child: MaterialApp(
         title: "Nice words",
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
+        ),
+        darkTheme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.deepOrange,
+            brightness: Brightness.dark,
+          ),
         ),
         home: const HomePage(),
       ),

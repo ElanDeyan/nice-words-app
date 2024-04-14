@@ -1,12 +1,17 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 
-final class MyAppGlobalState extends ChangeNotifier {
+final class GeneratedWords extends ChangeNotifier {
   WordPair currentWordPair = WordPair.random();
 
   final favorites = <WordPair>{};
 
+  final List<WordPair> _generatedWords = [];
+
+  List<WordPair> get generatedWords => _generatedWords;
+
   void nextWord() {
+    _generatedWords.add(currentWordPair);
     currentWordPair = WordPair.random();
     notifyListeners();
   }
@@ -17,6 +22,11 @@ final class MyAppGlobalState extends ChangeNotifier {
     } else {
       favorites.add(value);
     }
+    notifyListeners();
+  }
+
+  void deleteFavorite(WordPair value) {
+    favorites.remove(value);
     notifyListeners();
   }
 }
