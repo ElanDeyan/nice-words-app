@@ -26,7 +26,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
       );
     }
 
-    final favorites = appState.favorites;
+    final favorites = appState.favorites.toList();
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -39,30 +39,33 @@ class _FavoritesPageState extends State<FavoritesPage> {
             ),
             Flexible(
               fit: FlexFit.tight,
-              child: GridView.count(
-                crossAxisCount: 2,
-                mainAxisSpacing: 1,
-                crossAxisSpacing: 1,
-                children: favorites
-                    .map(
-                      (e) => Row(
-                        children: [
-                          IconButton(
-                            onPressed: () => setState(() {
-                              appState.deleteFavorite(e);
-                            }),
-                            icon: const Icon(Icons.delete_forever),
-                          ),
-                          Text(
-                            e.asLowerCase,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 1,
+                  crossAxisSpacing: 1,
+                  childAspectRatio: 16 / 9,
+                ),
+                itemCount: favorites.length,
+                itemBuilder: (context, index) {
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        onPressed: () => setState(() {
+                          appState.deleteFavorite(favorites[index]);
+                        }),
+                        icon: const Icon(Icons.delete_forever),
                       ),
-                    )
-                    .toList(),
+                      Text(
+                        favorites[index].asLowerCase,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ],
