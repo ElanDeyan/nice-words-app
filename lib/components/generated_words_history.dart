@@ -14,19 +14,16 @@ final class GeneratedWordsHistory extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 20),
-      child: SingleChildScrollView(
+      child: ListView.builder(
+        clipBehavior: Clip.antiAliasWithSaveLayer,
         reverse: true,
+        shrinkWrap: true,
         controller: ScrollController(),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final word in generatedWords) ...[
-              GeneratedWordText(wordPair: word),
-              const SizedBox(
-                height: 15,
-              ),
-            ],
-          ],
+        itemCount: generatedWords.length,
+        itemBuilder: (context, index) => Center(
+          child: GeneratedWordText(
+            wordPair: generatedWords[index],
+          ),
         ),
       ),
     );
