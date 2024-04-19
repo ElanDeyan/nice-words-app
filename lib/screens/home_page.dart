@@ -57,11 +57,9 @@ class _MainViewState extends State<MainView> {
           ),
         ],
       ),
-      body: Expanded(
-        child: ColoredBox(
-          color: Theme.of(context).colorScheme.primaryContainer,
-          child: page,
-        ),
+      body: ColoredBox(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        child: page,
       ),
       bottomNavigationBar: NavigationBar(
         destinations: const <Widget>[
