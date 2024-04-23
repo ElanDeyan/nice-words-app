@@ -8,7 +8,7 @@ final class GeneratedWords extends ChangeNotifier {
 
   final List<WordPair> _generatedWords = [];
 
-  List<WordPair> get generatedWords => _generatedWords;
+  List<WordPair> get wordPairHistory => _generatedWords;
 
   void nextWord() {
     _generatedWords.add(currentWordPair);

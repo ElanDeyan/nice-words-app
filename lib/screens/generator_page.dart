@@ -10,7 +10,7 @@ final class GeneratorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<GeneratedWords>();
-    final generatedWords = appState.generatedWords;
+    final generatedWords = appState.wordPairHistory;
 
     return Center(
       child: Column(

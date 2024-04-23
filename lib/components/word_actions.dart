@@ -18,7 +18,7 @@ final class WordActions extends StatelessWidget {
     final label = appState.favorites.contains(pair) ? 'Dislike' : 'Like';
 
     return Column(
-      mainAxisAlignment: appState.generatedWords.isEmpty
+      mainAxisAlignment: appState.wordPairHistory.isEmpty
           ? MainAxisAlignment.center
           : MainAxisAlignment.start,
       children: <Widget>[
