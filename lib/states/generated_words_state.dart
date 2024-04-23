@@ -1,32 +1,38 @@
+import 'dart:collection';
+
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 
 final class GeneratedWords extends ChangeNotifier {
   WordPair currentWordPair = WordPair.random();
 
-  final favorites = <WordPair>{};
+  final _favorites = <WordPair>{};
 
-  final List<WordPair> _generatedWords = [];
+  UnmodifiableSetView<WordPair> get favorites =>
+      UnmodifiableSetView(_favorites);
 
-  List<WordPair> get wordPairHistory => _generatedWords;
+  final List<WordPair> _generatedWordsHistory = [];
+
+  UnmodifiableListView<WordPair> get wordPairHistory =>
+      UnmodifiableListView(_generatedWordsHistory);
 
   void nextWord() {
-    _generatedWords.add(currentWordPair);
+    _generatedWordsHistory.add(currentWordPair);
     currentWordPair = WordPair.random();
     notifyListeners();
   }
 
   void toggleFavorites(WordPair value) {
-    if (favorites.contains(value)) {
-      favorites.remove(value);
+    if (_favorites.contains(value)) {
+      _favorites.remove(value);
     } else {
-      favorites.add(value);
+      _favorites.add(value);
     }
     notifyListeners();
   }
 
   void deleteFavorite(WordPair value) {
-    favorites.remove(value);
+    _favorites.remove(value);
     notifyListeners();
   }
 }
