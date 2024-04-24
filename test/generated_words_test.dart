@@ -1,4 +1,5 @@
 import 'dart:math' show Random;
+
 import 'package:english_words/english_words.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:myapp/states/generated_words_state.dart';
@@ -137,9 +138,9 @@ void main() {
         isFavorited = !isFavorited;
       });
 
-      generatedWords
-        ..toggleFavorites(wordPair)
-        ..toggleFavorites(wordPair);
+      generatedWords.toggleFavorites(wordPair);
+      expect(isFavorited, isTrue);
+      generatedWords.toggleFavorites(wordPair);
 
       expect(isFavorited, isFalse);
     });
