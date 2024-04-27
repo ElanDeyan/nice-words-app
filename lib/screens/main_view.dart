@@ -1,8 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:myapp/screens/favorites_page.dart';
 import 'package:myapp/screens/generator_page.dart';
+import 'package:myapp/screens/settings_page.dart';
 import 'package:myapp/states/preferences.dart';
 import 'package:provider/provider.dart';
 
@@ -26,20 +25,24 @@ class _MainViewState extends State<MainView> {
     final Widget page = switch (selectedIndex) {
       0 => const GeneratorPage(),
       1 => const FavoritesPage(),
-      2 => const Placeholder(),
+      2 => const SettingsPage(),
       _ => throw UnimplementedError('no widget for $selectedIndex'),
     };
 
     final appPreferences = Provider.of<AppPreferences>(context);
 
+    final changeThemeIcon = switch (appPreferences.themeMode) {
+      ThemeMode.system => Icons.brightness_auto,
+      ThemeMode.dark => Icons.dark_mode,
+      ThemeMode.light => Icons.light_mode,
+    };
+
     return Scaffold(
       appBar: AppBar(
         actions: <Widget>[
           IconButton(
-            onPressed: () => scheduleMicrotask(() {
-              appPreferences.toggleThemeMode();
-            }),
-            icon: const Icon(Icons.brightness_auto),
+            onPressed: () => appPreferences.toggleThemeMode(),
+            icon: Icon(changeThemeIcon),
           ),
           const SizedBox(
             width: 10,
@@ -47,7 +50,7 @@ class _MainViewState extends State<MainView> {
           IconButton(
             onPressed: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const Placeholder()),
+                MaterialPageRoute(builder: (context) => const SettingsPage()),
               );
             },
             icon: const Icon(Icons.settings),
