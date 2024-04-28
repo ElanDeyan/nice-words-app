@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/screens/main_view.dart';
 import 'package:myapp/services/shared_preferences_service.dart';
+import 'package:myapp/services/user_favorites_with_shared_preferences.dart';
 import 'package:myapp/states/generated_words_state.dart';
-import 'package:myapp/states/preferences.dart';
+import 'package:myapp/states/local_app_preferences.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  const localPreferences = SharedPreferencesService();
-  final appPreferences =
-      AppPreferences(localPreferencesHandler: localPreferences);
-  await appPreferences.loadLocalPreferences();
+  const localAppPreferences = LocalPreferencesWithSharedPreferences();
+  final appPreferencesNotifier =
+      AppPreferences(localPreferencesHandler: localAppPreferences);
+  await appPreferencesNotifier.loadLocalPreferences();
+
+  const localUserFavorites = UserFavoritesWithSharedPreferences();
+  final userFavoritesNotifier =
+      GeneratedWords(userFavoritesHandler: localUserFavorites);
+
   runApp(
     MyAppProvider(
-      appPreferences: appPreferences,
+      appPreferences: appPreferencesNotifier,
+      generatedWords: userFavoritesNotifier,
     ),
   );
 }
@@ -22,16 +29,20 @@ final class MyAppProvider extends StatelessWidget {
   const MyAppProvider({
     super.key,
     required AppPreferences appPreferences,
-  }) : _appPreferences = appPreferences;
+    required GeneratedWords generatedWords,
+  })  : _appPreferences = appPreferences,
+        _generatedWords = generatedWords;
 
   final AppPreferences _appPreferences;
+
+  final GeneratedWords _generatedWords;
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (context) => GeneratedWords(),
+          create: (context) => _generatedWords,
         ),
         ChangeNotifierProvider(
           create: (context) => _appPreferences,

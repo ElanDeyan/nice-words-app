@@ -6,8 +6,8 @@ import 'package:myapp/helpers/theme_mode_from_string.dart';
 import 'package:myapp/services/local_preferences.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final class SharedPreferencesService implements LocalPreferences {
-  const SharedPreferencesService();
+final class LocalPreferencesWithSharedPreferences implements LocalPreferences {
+  const LocalPreferencesWithSharedPreferences();
 
   @override
   Future<ThemeMode> get themeMode async {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:myapp/screens/favorites_page.dart';
 import 'package:myapp/screens/generator_page.dart';
 import 'package:myapp/screens/settings_page.dart';
-import 'package:myapp/states/preferences.dart';
+import 'package:myapp/states/local_app_preferences.dart';
 import 'package:provider/provider.dart';
 
 final class MainView extends StatefulWidget {

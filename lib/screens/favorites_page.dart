@@ -12,9 +12,9 @@ final class FavoritesPage extends StatefulWidget {
 class _FavoritesPageState extends State<FavoritesPage> {
   @override
   Widget build(BuildContext context) {
-    final appState = context.watch<GeneratedWords>();
+    final userFavorites = Provider.of<GeneratedWords>(context);
 
-    if (appState.favorites.isEmpty) {
+    if (userFavorites.favorites.isEmpty) {
       return const Center(
         child: Text(
           'No favorites',
@@ -26,49 +26,54 @@ class _FavoritesPageState extends State<FavoritesPage> {
       );
     }
 
-    final favorites = appState.favorites.toList();
-
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Center(
-        child: Column(
-          children: <Widget>[
-            Text(
-              'You have ${favorites.length} favorites:',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Flexible(
-              fit: FlexFit.tight,
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 1,
-                  crossAxisSpacing: 1,
-                  childAspectRatio: 16 / 9,
+        child: Consumer<GeneratedWords>(
+          builder: (context, value, child) {
+            final favoritesAsList = value.favorites.toList();
+            return Column(
+              children: <Widget>[
+                Text(
+                  'You have ${favoritesAsList.length} favorites:',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                itemCount: favorites.length,
-                itemBuilder: (context, index) {
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        onPressed: () => setState(() {
-                          appState.deleteFavorite(favorites[index]);
-                        }),
-                        icon: const Icon(Icons.delete_forever),
-                      ),
-                      Text(
-                        favorites[index].asLowerCase,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ],
+                Flexible(
+                  fit: FlexFit.tight,
+                  child: GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 1,
+                      crossAxisSpacing: 1,
+                      childAspectRatio: 16 / 9,
+                    ),
+                    itemCount: favoritesAsList.length,
+                    itemBuilder: (context, index) {
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            onPressed: () => setState(() {
+                              userFavorites
+                                  .deleteFavorite(favoritesAsList[index]);
+                            }),
+                            icon: const Icon(Icons.delete_forever),
+                          ),
+                          Text(
+                            favoritesAsList[index].asPascalCase,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
