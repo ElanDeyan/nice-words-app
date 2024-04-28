@@ -1,18 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/screens/main_view.dart';
-import 'package:myapp/services/local_preferences.dart';
+import 'package:myapp/services/shared_preferences_service.dart';
 import 'package:myapp/states/generated_words_state.dart';
 import 'package:myapp/states/preferences.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  runApp(const MyAppProvider());
+  const localPreferences = SharedPreferencesService();
+  final appPreferences =
+      AppPreferences(localPreferencesHandler: localPreferences);
+  await appPreferences.loadLocalPreferences();
+  runApp(
+    MyAppProvider(
+      appPreferences: appPreferences,
+    ),
+  );
 }
 
 final class MyAppProvider extends StatelessWidget {
-  const MyAppProvider({super.key});
+  const MyAppProvider({
+    super.key,
+    required AppPreferences appPreferences,
+  }) : _appPreferences = appPreferences;
+
+  final AppPreferences _appPreferences;
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +34,7 @@ final class MyAppProvider extends StatelessWidget {
           create: (context) => GeneratedWords(),
         ),
         ChangeNotifierProvider(
-          create: (context) => AppPreferences(
-            localPreferencesHandler: SharedPreferencesService(),
-          ),
+          create: (context) => _appPreferences,
         ),
       ],
       child: const MyApp(),
@@ -32,36 +42,33 @@ final class MyAppProvider extends StatelessWidget {
   }
 }
 
-final class MyApp extends StatefulWidget {
-  const MyApp({
-    super.key,
-  });
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    final appPreferences = Provider.of<AppPreferences>(context);
-
-    return MaterialApp(
-      title: "Nice words",
-      debugShowCheckedModeBanner: false,
-      themeMode: appPreferences.themeMode,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme:
-            ColorScheme.fromSeed(seedColor: appPreferences.colorPallete.color),
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: appPreferences.colorPallete.color,
-          brightness: Brightness.dark,
-        ),
-      ),
-      home: const MainView(),
+    return Consumer<AppPreferences>(
+      builder: (context, value, child) {
+        return MaterialApp(
+          title: "Nice words",
+          debugShowCheckedModeBanner: false,
+          themeMode: value.themeMode,
+          theme: ThemeData(
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: value.colorPallete.color,
+            ),
+          ),
+          darkTheme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: value.colorPallete.color,
+              brightness: Brightness.dark,
+            ),
+          ),
+          home: child,
+        );
+      },
+      child: const MainView(),
     );
   }
 }

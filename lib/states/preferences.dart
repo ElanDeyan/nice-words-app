@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:myapp/constants/color_pallete.dart';
 import 'package:myapp/constants/theme_mode.dart';
@@ -8,8 +10,17 @@ final class AppPreferences extends ChangeNotifier {
     required LocalPreferences localPreferencesHandler,
   })  : _localPreferencesHandler = localPreferencesHandler,
         _themeMode = defaultThemeMode,
-        _colorPallete = defaultColorPallete;
+        _colorPallete = defaultColorPallete {
+    Future.microtask(() async {
+      await loadLocalPreferences();
+    });
+  }
   final LocalPreferences _localPreferencesHandler;
+
+  Future<void> loadLocalPreferences() async {
+    _themeMode = await _localPreferencesHandler.themeMode;
+    _colorPallete = await _localPreferencesHandler.colorPallete;
+  }
 
   ThemeMode _themeMode;
 
@@ -17,7 +28,9 @@ final class AppPreferences extends ChangeNotifier {
 
   set themeMode(ThemeMode themeMode) {
     _themeMode = themeMode;
-    Future.microtask(() => _localPreferencesHandler.setThemeMode(themeMode));
+    Future.microtask(
+      () async => await _localPreferencesHandler.setThemeMode(themeMode),
+    );
     notifyListeners();
   }
 
@@ -25,20 +38,14 @@ final class AppPreferences extends ChangeNotifier {
     switch (_themeMode) {
       case ThemeMode.light:
         _themeMode = ThemeMode.dark;
-        Future.microtask(
-          () => _localPreferencesHandler.setThemeMode(ThemeMode.dark),
-        );
       case ThemeMode.dark:
         _themeMode = ThemeMode.system;
-        Future.microtask(
-          () => _localPreferencesHandler.setThemeMode(ThemeMode.system),
-        );
       case ThemeMode.system:
         _themeMode = ThemeMode.light;
-        Future.microtask(
-          () => _localPreferencesHandler.setThemeMode(ThemeMode.light),
-        );
     }
+    Future.microtask(
+      () async => await _localPreferencesHandler.setThemeMode(_themeMode),
+    );
     notifyListeners();
   }
 
@@ -49,7 +56,7 @@ final class AppPreferences extends ChangeNotifier {
   set colorPallete(ColorPallete colorPallete) {
     _colorPallete = colorPallete;
     Future.microtask(
-      () => _localPreferencesHandler.setColorPallete(colorPallete),
+      () async => await _localPreferencesHandler.setColorPallete(colorPallete),
     );
     notifyListeners();
   }
