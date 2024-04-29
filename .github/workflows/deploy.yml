@@ -1,0 +1,23 @@
+name: Deploy Flutter Web App
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        # Add specific commands to install dependencies here
+      - name: Build for web
+        run: flutter build web --release
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          folder: build/web
+          commit_message: 'build: Deploy web app (triggered by ${{ github.sha }})'
