@@ -12,6 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install dependencies
+        run: flutter pub get
         # Add specific commands to install dependencies here
       - name: Build for web
         run: flutter build web --release
