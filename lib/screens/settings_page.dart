@@ -1,20 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:myapp/states/preferences.dart';
+import 'package:myapp/constants/color_pallete.dart';
+import 'package:myapp/states/local_app_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-enum ColorPallete {
-  blue(Colors.blue),
-  red(Colors.red),
-  green(Colors.green),
-  yellow(Colors.yellow),
-  orange(Colors.orange),
-  purple(Colors.purple);
-
-  final Color color;
-  const ColorPallete(this.color);
-}
 
 final class SettingsPage extends StatelessWidget {
   const SettingsPage();

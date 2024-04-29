@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:myapp/screens/favorites_page.dart';
 import 'package:myapp/screens/generator_page.dart';
 import 'package:myapp/screens/settings_page.dart';
-import 'package:myapp/states/preferences.dart';
+import 'package:myapp/states/local_app_preferences.dart';
 import 'package:provider/provider.dart';
 
 final class MainView extends StatefulWidget {
@@ -32,9 +32,9 @@ class _MainViewState extends State<MainView> {
     final appPreferences = Provider.of<AppPreferences>(context);
 
     final changeThemeIcon = switch (appPreferences.themeMode) {
-      ThemeMode.light => Icons.light_mode,
-      ThemeMode.dark => Icons.dark_mode,
       ThemeMode.system => Icons.brightness_auto,
+      ThemeMode.dark => Icons.dark_mode,
+      ThemeMode.light => Icons.light_mode,
     };
 
     return Scaffold(

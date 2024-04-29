@@ -1,27 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/screens/home_page.dart';
+import 'package:myapp/screens/main_view.dart';
+import 'package:myapp/services/shared_preferences_service.dart';
+import 'package:myapp/services/user_favorites_with_shared_preferences.dart';
 import 'package:myapp/states/generated_words_state.dart';
-import 'package:myapp/states/preferences.dart';
+import 'package:myapp/states/local_app_preferences.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  const localAppPreferences = LocalPreferencesWithSharedPreferences();
+  final appPreferencesNotifier =
+      AppPreferences(localPreferencesHandler: localAppPreferences);
+  await appPreferencesNotifier.loadLocalPreferences();
 
-  runApp(const MyAppProvider());
+  const localUserFavorites = UserFavoritesWithSharedPreferences();
+  final userFavoritesNotifier =
+      GeneratedWords(userFavoritesHandler: localUserFavorites);
+
+  runApp(
+    MyAppProvider(
+      appPreferences: appPreferencesNotifier,
+      generatedWords: userFavoritesNotifier,
+    ),
+  );
 }
 
 final class MyAppProvider extends StatelessWidget {
-  const MyAppProvider({super.key});
+  const MyAppProvider({
+    super.key,
+    required AppPreferences appPreferences,
+    required GeneratedWords generatedWords,
+  })  : _appPreferences = appPreferences,
+        _generatedWords = generatedWords;
+
+  final AppPreferences _appPreferences;
+
+  final GeneratedWords _generatedWords;
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (context) => GeneratedWords(),
+          create: (context) => _generatedWords,
         ),
         ChangeNotifierProvider(
-          create: (context) => AppPreferences(),
+          create: (context) => _appPreferences,
         ),
       ],
       child: const MyApp(),
@@ -29,31 +53,33 @@ final class MyAppProvider extends StatelessWidget {
   }
 }
 
-final class MyApp extends StatelessWidget {
-  const MyApp({
-    super.key,
-  });
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final preferences = Provider.of<AppPreferences>(context);
-
-    return MaterialApp(
-      title: "Nice words",
-      themeMode: preferences.themeMode,
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme:
-            ColorScheme.fromSeed(seedColor: preferences.colorPallete.color),
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: preferences.colorPallete.color,
-          brightness: Brightness.dark,
-        ),
-      ),
-      home: const MainView(),
+    return Consumer<AppPreferences>(
+      builder: (context, value, child) {
+        return MaterialApp(
+          title: "Nice words",
+          debugShowCheckedModeBanner: false,
+          themeMode: value.themeMode,
+          theme: ThemeData(
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: value.colorPallete.color,
+            ),
+          ),
+          darkTheme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: value.colorPallete.color,
+              brightness: Brightness.dark,
+            ),
+          ),
+          home: child,
+        );
+      },
+      child: const MainView(),
     );
   }
 }
