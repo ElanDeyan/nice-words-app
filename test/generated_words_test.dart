@@ -1,148 +1,200 @@
-import 'dart:math' show Random;
-
 import 'package:english_words/english_words.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:myapp/constants/user_favorites.dart';
+import 'package:myapp/services/user_favorites_with_shared_preferences.dart';
 import 'package:myapp/states/generated_words_state.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  late GeneratedWords generatedWords;
-  setUp(() => generatedWords = GeneratedWords());
+final mockFavorites = <String, List<String>>{
+  userFavoritesKey: <String>[
+    for (var i = 0; i < 10; i++) WordPair.random().asSnakeCase,
+  ],
+};
 
-  tearDown(() => generatedWords = GeneratedWords());
+void main() async {
+  setUp(() => SharedPreferences.setMockInitialValues(mockFavorites));
 
-  group('Start state', () {
-    test(
-      'with an randomWord without call next',
-      () => expect(generatedWords.currentWordPair, isA<WordPair>()),
-    );
+  SharedPreferences.setMockInitialValues(mockFavorites);
 
-    test(
-      'with empty history',
-      () => expect(generatedWords.wordPairHistory, equals(<WordPair>[])),
-    );
+  var generatedWords = GeneratedWords(
+    userFavoritesHandler: const UserFavoritesWithSharedPreferences(),
+  );
 
-    test(
-      'with empty favorites set',
-      () => expect(generatedWords.favorites, equals(<WordPair>{})),
-    );
-  });
-
-  group('Generating words', () {
-    setUp(() => generatedWords..nextWord());
-
-    test('is adding', () {
-      expect(generatedWords.wordPairHistory, hasLength(1));
-      expect(
-        generatedWords.wordPairHistory.single,
-        isNot(generatedWords.currentWordPair),
-      );
+  group('SharedPreferences', () {
+    test('Has $userFavoritesKey key', () async {
+      final prefs = await SharedPreferences.getInstance();
+      final favorites = prefs.getStringList(userFavoritesKey);
+      expect(favorites, isNotNull);
     });
-    test('adding more than one time', () {
-      final numberOfPairsToAdd = Random().nextInt(10);
-      final numberOfItemsBeforeAdd = generatedWords
-          .wordPairHistory.length; // should be 1 because of setup of this group
 
-      for (var i = 0; i < numberOfPairsToAdd; i++) {
-        generatedWords.nextWord();
-      }
-
-      expect(
-        generatedWords.wordPairHistory,
-        hasLength(numberOfItemsBeforeAdd + numberOfPairsToAdd),
-      );
+    test('Has the initial data', () async {
+      final prefs = await SharedPreferences.getInstance();
+      final favorites = prefs.getStringList(userFavoritesKey);
+      expect(favorites, isNotNull);
+      expect(favorites, equals(mockFavorites[userFavoritesKey]));
     });
   });
 
-  group('Favorites', () {
-    generatedWords = GeneratedWords();
+  group('User favorites handler', () {
+    var localFavorites = const UserFavoritesWithSharedPreferences();
+    setUp(() {
+      localFavorites = const UserFavoritesWithSharedPreferences();
+    });
+    tearDown(() => localFavorites = const UserFavoritesWithSharedPreferences());
 
-    group('Toggling favorite', () {
-      final numberOfPairToGenerate = Random().nextInt(10) + 1;
-      for (var i = 0; i < numberOfPairToGenerate; i++) {
-        generatedWords.nextWord();
-      }
+    test('Getter', () async {
+      expect(
+        await localFavorites.userFavorites,
+        mockFavorites[userFavoritesKey],
+      );
+    });
 
-      final generatedWordsHistory = generatedWords.wordPairHistory;
+    test('Setter', () async {
+      final wordsToAssign = [
+        for (var i = 0; i < 10; i++) WordPair.random().asSnakeCase,
+      ];
 
-      final randomIndex = Random().nextInt(generatedWordsHistory.length);
+      expect(await localFavorites.userFavorites, isNot(wordsToAssign));
 
-      final itemToUse = generatedWordsHistory[randomIndex];
-      test('adding one favorite', () {
-        expect(generatedWords.favorites, isEmpty);
-        generatedWords.toggleFavorites(itemToUse);
-        expect(generatedWords.favorites, hasLength(1));
-        expect(
-          generatedWords.favorites,
-          contains(itemToUse),
-        );
-      });
+      await localFavorites.setUserFavorites(wordsToAssign);
 
-      test('Removing favorite', () {
-        expect(generatedWords.favorites, isEmpty);
+      expect(await localFavorites.userFavorites, equals(wordsToAssign));
 
-        generatedWords
-          ..toggleFavorites(itemToUse)
-          ..toggleFavorites(itemToUse);
+      await localFavorites.setUserFavorites(<String>[]);
 
-        expect(generatedWords.favorites, isEmpty);
-      });
+      expect(await localFavorites.userFavorites, isEmpty);
+    });
+
+    test('Adding', () async {
+      final wordPair = WordPair.random();
+
+      await localFavorites.addFavorite(wordPair);
+
+      expect(
+        await localFavorites.userFavorites,
+        containsOnce(wordPair.asSnakeCase),
+      );
+
+      expect(
+        await localFavorites.userFavorites,
+        hasLength(mockFavorites[userFavoritesKey]!.length + 1),
+      );
+    });
+
+    test('Deleting favorite', () async {
+      final sample = mockFavorites[userFavoritesKey]!.first;
+      expect(await localFavorites.userFavorites, containsOnce(sample));
+
+      final [sampleFirstWord, sampleSecondWord] = sample.split('_');
+
+      await localFavorites
+          .removeFavorite(WordPair(sampleFirstWord, sampleSecondWord));
+
+      final userFavorites = await localFavorites.userFavorites;
+
+      expect(userFavorites.contains(sample), isFalse);
+    });
+
+    test('Clear', () async {
+      expect(
+        await localFavorites.userFavorites,
+        equals(mockFavorites[userFavoritesKey]),
+      );
+
+      await localFavorites.clearFavorites();
+
+      expect(await localFavorites.userFavorites, isEmpty);
     });
   });
 
-  group('Deleting favorite', () {
-    generatedWords = GeneratedWords();
-    final numberOfPairToGenerate = Random().nextInt(10) + 1;
-    for (var i = 0; i < numberOfPairToGenerate; i++) {
-      generatedWords.nextWord();
-    }
+  group('Generated words', () {
+    SharedPreferences.setMockInitialValues(mockFavorites);
+    generatedWords = GeneratedWords(
+      userFavoritesHandler: const UserFavoritesWithSharedPreferences(),
+    );
+    test('load with initial data', () async {
+      expect(generatedWords.favorites, hasLength(10));
+    });
 
-    final generatedWordsHistory = generatedWords.wordPairHistory;
+    test('start with wordpair', () {
+      expect(generatedWords.currentWordPair, isA<WordPair>());
+    });
 
-    final randomIndex = Random().nextInt(generatedWordsHistory.length);
-
-    final itemToUse = generatedWordsHistory[randomIndex];
-
-    test('deleting', () {
-      generatedWords.toggleFavorites(itemToUse);
+    test('first wordpair is not in history', () {
+      final currentWordPair = generatedWords.currentWordPair;
       expect(
-        generatedWords.favorites,
-        contains(itemToUse),
-      );
-
-      generatedWords.deleteFavorite(itemToUse);
-
-      expect(
-        generatedWords.favorites.contains(itemToUse),
+        generatedWords.wordPairHistory.contains(currentWordPair),
         isFalse,
       );
     });
-  });
 
-  group('Is notifying', () {
-    test('generating a word', () {
-      var currentWordPair = generatedWords.currentWordPair;
-
-      generatedWords.addListener(() {
-        expect(currentWordPair, isNot(generatedWords.currentWordPair));
-        currentWordPair = generatedWords.currentWordPair;
-      });
-
+    test('next adds to history', () {
+      final firstWord = generatedWords.currentWordPair;
       generatedWords.nextWord();
-      expect(currentWordPair, generatedWords.currentWordPair);
+      expect(generatedWords.wordPairHistory, contains(firstWord));
     });
 
-    test('toggling favorite', () {
-      final wordPair = generatedWords.currentWordPair;
-      var isFavorited = false;
-      generatedWords.addListener(() {
-        isFavorited = !isFavorited;
-      });
+    test('current is different than previous', () {
+      final firstWord = generatedWords.currentWordPair;
+      generatedWords.nextWord();
+      expect(firstWord, isNot(generatedWords.currentWordPair));
 
-      generatedWords.toggleFavorites(wordPair);
-      expect(isFavorited, isTrue);
-      generatedWords.toggleFavorites(wordPair);
+      expect(generatedWords.wordPairHistory, containsOnce(firstWord));
+    });
 
-      expect(isFavorited, isFalse);
+    test('toggle favorite', () {
+      final firstWord = generatedWords.currentWordPair;
+      generatedWords.nextWord();
+      expect(generatedWords.favorites.contains(firstWord), isFalse);
+
+      generatedWords.toggleFavorites(firstWord);
+      expect(generatedWords.favorites, contains(firstWord));
+
+      final currentWordPair = generatedWords.currentWordPair;
+
+      generatedWords.toggleFavorites(currentWordPair);
+
+      expect(
+        generatedWords.favorites,
+        contains(currentWordPair),
+      );
+
+      generatedWords.toggleFavorites(currentWordPair);
+
+      expect(generatedWords.favorites.contains(currentWordPair), isFalse);
+    });
+
+    test('delete favorite', () {
+      final firstWord = generatedWords.currentWordPair;
+
+      generatedWords.toggleFavorites(firstWord);
+
+      expect(generatedWords.favorites, containsOnce(firstWord));
+
+      generatedWords.deleteFavorite(firstWord);
+
+      expect(generatedWords.favorites.contains(firstWord), isFalse);
+
+      generatedWords.nextWord();
+
+      expect(
+        generatedWords.wordPairHistory,
+        containsOnce(firstWord),
+        reason: "Remove from favorites doesn't remove from history",
+      );
+
+      // another time
+      final anotherWord = generatedWords.currentWordPair;
+
+      expect(anotherWord, isNot(firstWord));
+
+      generatedWords.toggleFavorites(anotherWord);
+
+      expect(generatedWords.favorites, containsOnce(anotherWord));
+
+      generatedWords.deleteFavorite(anotherWord);
+
+      expect(generatedWords.favorites.contains(anotherWord), isFalse);
     });
   });
 }
