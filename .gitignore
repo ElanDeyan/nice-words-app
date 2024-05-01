@@ -1,4 +1,4 @@
-# Miscellaneous
+# Miscellaneos
 *.class
 *.log
 *.pyc
@@ -30,8 +30,8 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
-
 !/build/web/*
+coverage/lcov.info
 
 # Symbolication related
 app.*.symbols
