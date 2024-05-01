@@ -6,21 +6,17 @@ import 'package:myapp/services/shared_preferences_service.dart';
 import 'package:myapp/states/local_app_preferences.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const mockPreferences = <String, String>{
-  colorPalletePreferencesKey: 'red',
-  themeModePreferencesKey: 'dark',
+final mockPreferences = <String, String>{
+  colorPalletePreferencesKey: ColorPallete.red.name,
+  themeModePreferencesKey: ThemeMode.dark.name,
 };
 
 void main() async {
-  const localPreferencesHandler = LocalPreferencesWithSharedPreferences();
   SharedPreferences.setMockInitialValues(mockPreferences);
+  const localPreferencesHandler = LocalPreferencesWithSharedPreferences();
   final appPreferences = AppPreferences(
     localPreferencesHandler: localPreferencesHandler,
   );
-
-  setUp(() {
-    SharedPreferences.setMockInitialValues(mockPreferences);
-  });
 
   group('Getters', () {
     test('ThemeMode', () {
@@ -78,7 +74,7 @@ void main() async {
       for (final colorPalleteToAssign in colorPalleteValues) {
         // updates [localColorPallete] for the next iteration
         localColorPallete = await localPreferencesHandler.colorPallete;
-        
+
         final oldLocalColorPallete = localColorPallete;
         expect(appPreferences.colorPallete, equals(oldLocalColorPallete));
 
@@ -86,7 +82,7 @@ void main() async {
 
         // simulates delay to write locally
         await Future.delayed(
-          const Duration(seconds: 1),
+          const Duration(milliseconds: 250),
         );
 
         expect(appPreferences.colorPallete, equals(colorPalleteToAssign));
