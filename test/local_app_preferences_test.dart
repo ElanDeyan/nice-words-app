@@ -76,6 +76,9 @@ void main() async {
           ColorPallete.values.where((element) => element != localColorPallete);
 
       for (final colorPalleteToAssign in colorPalleteValues) {
+        // updates [localColorPallete] for the next iteration
+        localColorPallete = await localPreferencesHandler.colorPallete;
+        
         final oldLocalColorPallete = localColorPallete;
         expect(appPreferences.colorPallete, equals(oldLocalColorPallete));
 
@@ -90,9 +93,6 @@ void main() async {
 
         final newLocalColorPallete = await localPreferencesHandler.colorPallete;
         expect(oldLocalColorPallete, isNot(newLocalColorPallete));
-
-        // updates [localColorPallete] for the next iteration
-        localColorPallete = await localPreferencesHandler.colorPallete;
       }
     });
   });
