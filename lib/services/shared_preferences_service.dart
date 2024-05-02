@@ -12,7 +12,7 @@ final class LocalPreferencesWithSharedPreferences implements LocalPreferences {
   @override
   Future<ThemeMode> get themeMode async {
     final prefs = await SharedPreferences.getInstance();
-    final localThemeMode = prefs.getString('themeMode');
+    final localThemeMode = prefs.getString(themeModePreferencesKey);
 
     if (localThemeMode != null) {
       return themeModeFromString(localThemeMode);
@@ -25,13 +25,13 @@ final class LocalPreferencesWithSharedPreferences implements LocalPreferences {
   Future<void> setThemeMode(ThemeMode themeMode) async {
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.setString('themeMode', themeMode.name);
+    await prefs.setString(themeModePreferencesKey, themeMode.name);
   }
 
   @override
   Future<ColorPallete> get colorPallete async {
     final prefs = await SharedPreferences.getInstance();
-    final localColorPallete = prefs.getString('colorPallete');
+    final localColorPallete = prefs.getString(colorPalletePreferencesKey);
 
     if (localColorPallete != null) {
       return colorPalleteFromString(localColorPallete);
@@ -43,6 +43,6 @@ final class LocalPreferencesWithSharedPreferences implements LocalPreferences {
   @override
   Future<void> setColorPallete(ColorPallete colorPallete) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('colorPallete', colorPallete.name);
+    await prefs.setString(colorPalletePreferencesKey, colorPallete.name);
   }
 }

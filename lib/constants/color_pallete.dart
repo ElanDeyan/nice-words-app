@@ -12,6 +12,8 @@ enum ColorPallete {
   const ColorPallete(this.color);
 }
 
+const colorPalletePreferencesKey = 'colorPallete';
+
 const defaultColorPallete = ColorPallete.blue;
 
 final defaultColorPalleteName = defaultColorPallete.name;
