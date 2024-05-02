@@ -66,12 +66,38 @@ void main() async {
   });
 
   group('Are changes saved locally?', () {
+    test('Theme mode', () async {
+      var localThemeMode = await localPreferencesHandler.themeMode;
+      final themeModeValuesExceptLocal =
+          ThemeMode.values.where((element) => element != localThemeMode);
+
+      for (final themeModeToAssign in themeModeValuesExceptLocal) {
+        // updates [localThemeMode] for the next iteration
+        localThemeMode = await localPreferencesHandler.themeMode;
+
+        final oldLocalThemeMode = localThemeMode;
+        expect(appPreferences.themeMode, equals(oldLocalThemeMode));
+
+        appPreferences.themeMode = themeModeToAssign;
+
+        // simulates delay to write locally
+        await Future.delayed(
+          const Duration(milliseconds: 250),
+        );
+
+        expect(appPreferences.themeMode, equals(themeModeToAssign));
+
+        final newLocalThemeMode = await localPreferencesHandler.themeMode;
+        expect(oldLocalThemeMode, isNot(newLocalThemeMode));
+      }
+    });
+
     test('Color Pallete', () async {
       var localColorPallete = await localPreferencesHandler.colorPallete;
-      final colorPalleteValues =
+      final colorPalleteValuesExceptLocal =
           ColorPallete.values.where((element) => element != localColorPallete);
 
-      for (final colorPalleteToAssign in colorPalleteValues) {
+      for (final colorPalleteToAssign in colorPalleteValuesExceptLocal) {
         // updates [localColorPallete] for the next iteration
         localColorPallete = await localPreferencesHandler.colorPallete;
 
