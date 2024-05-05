@@ -22,12 +22,16 @@ final class WordActions extends StatelessWidget {
           ? MainAxisAlignment.center
           : MainAxisAlignment.start,
       children: <Widget>[
-        BigCard(pair: pair),
+        BigCard(
+          pair: pair,
+          key: const Key('randomWord'),
+        ),
         const SizedBox(height: 10),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             ElevatedButton(
+              key: const Key('toggleFavorite'),
               onPressed: () => appState.toggleFavorites(pair),
               child: Row(
                 children: <Widget>[
@@ -39,6 +43,7 @@ final class WordActions extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             ElevatedButton(
+              key: const Key('nextWord'),
               onPressed: () => appState.nextWord(),
               child: const Text('Next'),
             ),
