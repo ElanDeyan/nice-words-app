@@ -1,7 +1,10 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:myapp/components/big_card.dart';
+import 'package:myapp/components/generated_word_text.dart';
 import 'package:myapp/constants/user_favorites.dart';
+import 'package:myapp/screens/generator_page.dart';
 import 'package:myapp/services/user_favorites_with_shared_preferences.dart';
 import 'package:myapp/states/generated_words_state.dart';
 import 'package:provider/provider.dart';
@@ -18,75 +21,44 @@ void main() {
       ChangeNotifierProvider.value(
         value: generatedWords,
         child: const MaterialApp(
-          home: GeneratedWordsTest(),
+          home: GeneratorPage(),
         ),
       ),
     );
 
-    expect(find.byType(Card), findsOneWidget);
+    expect(generatedWords.wordPairHistory, isEmpty);
 
-    expect(find.byKey(const Key('history')), findsNothing);
+    final firstWord = generatedWords.currentWordPair;
 
     await widgetTester.tap(find.byKey(const Key('nextWord')));
-
     await widgetTester.pumpAndSettle();
+
+    final listViewFinder = find.byKey(const Key('wordsHistory'));
+    expect(listViewFinder, findsOneWidget);
+
+    expect(generatedWords.wordPairHistory, hasLength(1));
+
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is GeneratedWordText && widget.wordPair == firstWord,
+      ),
+      findsOneWidget,
+    );
+
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is BigCard && widget.pair != firstWord,
+      ),
+      findsOneWidget,
+    );
+
+    await widgetTester.tap(find.byKey(const Key('toggleFavorite')));
+    await widgetTester.pumpAndSettle();
+
+    expect(generatedWords.favorites, contains(generatedWords.currentWordPair));
   });
 }
 
 final mockPreferences = <String, List<String>>{
   userFavoritesKey: [WordPair.random().asSnakeCase],
 };
-
-final class GeneratedWordsTest extends StatelessWidget {
-  const GeneratedWordsTest();
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: Consumer<GeneratedWords>(
-        builder: (context, value, child) {
-          return Column(
-            children: [
-              const Text('Favorites:'),
-              Row(
-                key: const Key('favorites'),
-                children: <Widget>[
-                  ...value.favorites.map(
-                    (element) => Chip(
-                      label: Text(element.asCamelCase),
-                    ),
-                  ),
-                ],
-              ),
-              const Divider(),
-              Card(
-                key: const Key('actualRandomWord'),
-                child: Text(value.currentWordPair.asCamelCase),
-              ),
-              const Divider(),
-              const Text('history'),
-              if (value.wordPairHistory.isNotEmpty)
-                Row(
-                  key: const Key('history'),
-                  children: [
-                    ...value.wordPairHistory
-                        .map((element) => Text(element.asCamelCase)),
-                  ],
-                ),
-              ElevatedButton(
-                onPressed: () => value.nextWord(),
-                key: const Key('nextWord'),
-                child: const Text('Next'),
-              ),
-              ElevatedButton(
-                onPressed: () => value.toggleFavorites(value.currentWordPair),
-                key: const Key('like'),
-                child: const Text('Like'),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
