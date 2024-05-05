@@ -29,6 +29,7 @@ final class GeneratedWordsHistory extends StatelessWidget {
           ],
         ).createShader(bounds),
         child: ListView.builder(
+          key: const Key('wordsHistory'),
           physics: const BouncingScrollPhysics(),
           shrinkWrap: true,
           controller: ScrollController(),
@@ -36,6 +37,7 @@ final class GeneratedWordsHistory extends StatelessWidget {
           itemCount: generatedWords.length,
           itemBuilder: (context, index) => Center(
             child: GeneratedWordText(
+              key: Key('#$index'),
               wordPair: [...generatedWords.reversed][index],
             ),
           ),

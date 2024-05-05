@@ -4,15 +4,14 @@ import 'package:myapp/states/generated_words_state.dart';
 import 'package:provider/provider.dart';
 
 final class GeneratedWordText extends StatelessWidget {
-  const GeneratedWordText({required WordPair wordPair, super.key})
-      : _wordPair = wordPair;
-  final WordPair _wordPair;
+  const GeneratedWordText({required this.wordPair, super.key});
+  final WordPair wordPair;
 
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<GeneratedWords>();
     final favorites = appState.favorites;
-    final isFavorite = favorites.contains(_wordPair);
+    final isFavorite = favorites.contains(wordPair);
 
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -27,7 +26,7 @@ final class GeneratedWordText extends StatelessWidget {
           const SizedBox(width: 15),
         ],
         Text(
-          _wordPair.asLowerCase,
+          wordPair.asLowerCase,
           style: TextStyle(
             fontSize: 16,
             color: colorScheme.primary,
